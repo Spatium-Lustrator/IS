@@ -1,9 +1,10 @@
 '''
-Сделать оформление заказа:
+1. Сделать оформление заказа:
 Пользователь нажал на кнопку >>> бот предлагает места выдачи >>> пользователь выбирает, ответ сохраняется в БД >>>
->> подтверждение заказа >>> новый order_id, соответсвующие записи в БД
+>> подтверждение заказа >>> новый order_id, соответсвующие записи в БД (У Дани)
 Добавить функцию для кассира:
 Когда заказ доставлен, он с помощью команды поставит статус "доставлено" +
+2. Удаление из корзины
 '''
 import telebot
 from telebot import types
@@ -15,7 +16,7 @@ zero = 0
 qb = telebot.TeleBot(token)
 all_data = {'last_order_id': 0, 'counts': 0, 'now_id': None, 'now_prod': None, 'now_price': None, 'now_del': None}
 product_data = {'tie_fig': {'beat_name': 'TIE-fighter', 'price': 500, 'desc': 'Обычный истребитель'},
-                'tie_def': {'beat_name': 'TIE-defender', 'price': 500, 'desc': 'Улучшенный истребитель, проект предложен гранд-адмиралом Трауном'},
+                'tie_def': {'beat_name': 'TIE-defender', 'price': 600, 'desc': 'Улучшенный истребитель, проект предложен гранд-адмиралом Трауном'},
                 'tie_int': {'beat_name': 'TIE-intereceptor', 'price': 500, 'desc': 'Резвый истребитель в Ваши ряды!'}}
 
 
@@ -64,7 +65,6 @@ def welcome(message):
                              paid=False, delivered=False, carried=False,
                              tie_def=0, tie_int=0, tie_fig=0)
         all_data['last_order_id'] += 1
-        print()
         qb.send_message(message.from_user.id, 'Добро пожаловать! Будем знакомы, я - Эрик.', reply_markup=markup)
     else:
         qb.send_message(message.from_user.id, 'Эй, привет! Я тебя знаю', reply_markup=markup)
@@ -89,7 +89,7 @@ def delivered(message):
 
 def set_count(message):
     all_data['counts'] = message.text
-    print(all_data['counts'])
+    print(all_data['now_prod'])
     if all_data['now_prod'] == 'tie_fig':
         db.Sqlither.add_fighter(self=True, user_id=message.from_user.id, count=int(all_data['counts']))
 
@@ -110,13 +110,28 @@ def delete_fromb(message):
         db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'], numb=all_data['now_del'])
         all_data['now_id'] = None
         all_data['counts'] = None
+        all_data['now_del'] = None
+        db.basket2 = []
+
 
 
     elif all_data['now_del'] == '2':
-        pass
+        db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'],
+                                       numb=all_data['now_del'])
+        all_data['now_id'] = None
+        all_data['counts'] = None
+        all_data['now_del'] = None
+        db.basket2 = []
 
     elif all_data['now_del'] == '3':
-        pass
+        db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'],
+                                       numb=all_data['now_del'])
+        all_data['now_id'] = None
+        all_data['counts'] = None
+        all_data['now_del'] = None
+        db.basket2 = []
+
+
 
 
 @qb.message_handler(commands=['setstat'])
@@ -140,6 +155,7 @@ def reactions(message):
                                                       'Итого за %s: %s' % (x+1, product_data[db.basket1[x]]['beat_name'],
                                                                        db.basket[db.basket1[x]], product_data[db.basket1[x]]['beat_name'],
                                                                            product_data[db.basket1[x]]['price']*db.basket[db.basket1[x]]))
+                print(db.basket1[x])
                 all_data['now_price'] = product_data[db.basket1[x]]['price']*db.basket[db.basket1[x]]
 
             if couel == 1:
@@ -153,7 +169,7 @@ def reactions(message):
 
             # qb.send_message(message.from_user.id, 'Итого: %s' % all_data['now_price'], reply_markup=delete_markup)
             all_data['now_price'] = None
-            #db.basket1 = []
+            db.basket1 = []
 
         elif db.basket['empty'] == True:
             qb.send_message(message.from_user.id, 'Ваша корзина пуста')
@@ -186,13 +202,13 @@ def callback_inline(call):
 
             elif call.data == 'tie3':
                 send = qb.send_message(call.message.chat.id, 'Введите необходимое количество товара: ')
-                all_data['now_prod'] = 'tie_def'
+                all_data['now_prod'] = 'tie_int'
                 qb.register_next_step_handler(send, set_count)
 
 
             elif call.data == 'tie2':
                 send = qb.send_message(call.message.chat.id, 'Введите необходимое количество товара: ')
-                all_data['now_prod'] = 'tie_int'
+                all_data['now_prod'] = 'tie_def'
                 qb.register_next_step_handler(send, set_count)
 
             elif call.data == 'del1':
@@ -201,13 +217,19 @@ def callback_inline(call):
                 qb.register_next_step_handler(send, delete_fromb)
 
             elif call.data == 'del2':
-                pass
+                all_data['now_del'] = '2'
+                send = qb.send_message(call.message.chat.id, 'Введите кол-во, которое необходимо удалить: ')
+                qb.register_next_step_handler(send, delete_fromb)
 
             elif call.data == 'del3':
-                pass
+                all_data['now_del'] = '3'
+                send = qb.send_message(call.message.chat.id, 'Введите кол-во, которое необходимо удалить: ')
+                qb.register_next_step_handler(send, delete_fromb)
 
             elif call.data == "delall":
-                pass
+                db.Sqlither.clear_basket(self=True, user_id=call.message.chat.id)
+                qb.send_message(call.message.chat.id, 'Успешно')
+
 
 
             elif call.data == 'carry':

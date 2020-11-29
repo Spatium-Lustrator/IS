@@ -5,6 +5,7 @@ ad = {'nci': None, 'None': 0}
 ties = ['tie_fig', 'tie_def', 'tie_int']
 basket = {'tie_fig': None, 'tie_def': None, 'tie_int': None, 'empty': False}
 basket1 = []
+basket2 = []
 
 class Sqlither:
 
@@ -21,7 +22,7 @@ class Sqlither:
         cursor = conn.cursor()
         cursor.execute('insert into order_status(user_id, order_id, paid, delivered, carried) values(?, ?, ?, ?, ?)',
                        (user_id, order_id, paid, delivered, carried))
-        cursor.execute('insert into order_composition(order_id, user_id, tie_fig, tie_def, tie_int) values(?, ?, ?, ?, ?)',
+        cursor.execute('insert into order_composition(order_id, user_id, tie_fig, tie_de, tie_in) values(?, ?, ?, ?, ?)',
                        (order_id, user_id, tie_fig, tie_def, tie_int))
         cursor.execute('insert into users(user_id, order_id) values(?, ?)', (user_id, order_id))
         conn.commit()
@@ -39,8 +40,9 @@ class Sqlither:
     def add_defender(self, user_id, count):
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
-        nc = cursor.execute('SELECT `tie_def` FROM `order_composition` WHERE `user_id` = ?', (user_id, )).fetchone()
-        cursor.execute('UPDATE `order_composition` SET `tie_def` = ? WHERE `user_id` = ?', (count+nc[0], user_id))
+        nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?', (user_id, )).fetchone()
+        print(nc)
+        cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?', (count+nc[0], user_id))
         conn.commit()
         conn.close()
 
@@ -48,6 +50,7 @@ class Sqlither:
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
         nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?', (user_id,)).fetchone()
+        print(nc)
         cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?', (count+nc[0], user_id))
         conn.commit()
         conn.close()
@@ -59,7 +62,7 @@ class Sqlither:
         return result
         conn.close()
 
-    def delivered(self, user_id, deliv):
+    def delivered(self, user_id):
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
         cursor.execute('UPDATE `order_status` SET `delivered` = 1 WHERE `user_id` = ?', (user_id, ))
@@ -74,18 +77,25 @@ class Sqlither:
         basket['empty'] = False
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
+        result = cursor.execute('SELECT * FROM `order_composition` WHERE user_id = ?', (user_id,)).fetchone()
         for i in range(0, 3):
-            result = cursor.execute('SELECT * FROM `order_composition` WHERE user_id = ?', (user_id, )).fetchone()
             if result != None:
                 basket[ties[i]] = result[i+2]
-            print(result)
-            print(basket)
+                print(basket)
+                print(i)
+                print(ties[i])
+
         for i in range(0, 3):
             if basket[ties[i]] == 0:
+                print('This is dict', basket[ties[i]])
                 ad['None'] += 1
                 print(ad['None'])
             else:
-                basket1.append(ties[i])
+                if ties[i] not in basket1 and basket[ties[i]] > 0:
+                    basket1.append(ties[i])
+                    print(basket1)
+                    basket2.append(ties[i])
+
 
         if ad['None'] >= 3:
             basket['empty'] = True
@@ -94,11 +104,74 @@ class Sqlither:
     def delete_from_basket(self, user_id, counts, numb):
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
-        # if numb == '1':
-        #     nc = cursor.execute('SELECT `tie_fig` FROM `order_composition` WHERE `user_id` = ?', (user_id,)).fetchone()
-        #     cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?', (int(nc[0])-int(counts), user_id))
-        # conn.commit()
-        # conn.close()
+        if numb == '1':
+            if basket2[0] == 'tie_fig':
+                nc = cursor.execute('SELECT `tie_fig` FROM `order_composition` WHERE `user_id` = ?', (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?', (int(nc[0])-int(counts), user_id))
+
+            elif basket2[0] == 'tie_def':
+                nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+            elif basket2[0] == 'tie_int':
+                nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+        elif numb == '2':
+            if basket2[1] == 'tie_fig':
+                nc = cursor.execute('SELECT `tie_fig` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+            elif basket2[1] == 'tie_def':
+                nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+            elif basket2[1] == 'tie_int':
+                nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+        elif numb == '3':
+            if basket2[2] == 'tie_fig':
+                nc = cursor.execute('SELECT `tie_fig` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+            elif basket2[2] == 'tie_def':
+                nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+            elif basket2[2] == 'tie_int':
+                nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
+                                    (user_id,)).fetchone()
+                cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
+                               (int(nc[0]) - int(counts), user_id))
+
+
+
+        conn.commit()
+        conn.close()
+
+    def clear_basket(self, user_id):
+        conn = sqlite3.connect('db.db')
+        cursor = conn.cursor()
+        cursor.execute('UPDATE `order_composition` SET `tie_fig` = 0, `tie_de` = 0, `tie_int` = 0 WHERE user_id = ?',
+                       (user_id, ))
+        conn.commit()
+        conn.close()
+
 
     def reg_order(self, user_id):
         pass
