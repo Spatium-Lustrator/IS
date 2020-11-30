@@ -14,6 +14,10 @@ first_prod = None
 token = '1303608144:AAH09kqBe4ahjau7lUKbx6kibiyK2QyvAXk'
 zero = 0
 qb = telebot.TeleBot(token)
+pic_tie_fig = 'https://cdna.artstation.com/p/assets/images/images/010/783/544/large/gregor-ruf-tie-fighter-01-1080.jpg?1526225039'
+pic_tie_def = 'https://avatars.mds.yandex.net/get-zen_doc/170671/pub_5b3dc74bede9b500a95bb050_5b3dc74fede9b500a95bb053/scale_1200'
+pic_tie_int = 'http://fractalsponge.net/wp/wp-content/uploads/2015/02/ti_test.jpg'
+all_data1 = {'1': pic_tie_fig, '2': pic_tie_def, '3': pic_tie_int, 'now_id': 1}
 all_data = {'last_order_id': 0, 'counts': 0, 'now_id': None, 'now_prod': None, 'now_price': None, 'now_del': None}
 product_data = {'tie_fig': {'beat_name': 'TIE-fighter', 'price': 500, 'desc': 'Обычный истребитель'},
                 'tie_def': {'beat_name': 'TIE-defender', 'price': 600, 'desc': 'Улучшенный истребитель, проект предложен гранд-адмиралом Трауном'},
@@ -32,7 +36,9 @@ but1 = types.InlineKeyboardButton('TIE-fighter', callback_data='tie1')
 but2 = types.InlineKeyboardButton('TIE-defender', callback_data='tie2')
 but3 = types.InlineKeyboardButton('TIE-interceptor', callback_data='tie3')
 but4 = types.InlineKeyboardButton('Мне не подходит ничего из выше предложенного', callback_data='no')
-markup1.add(but1, but2, but3, but4)
+bu5 = types.InlineKeyboardButton('>>>', callback_data='>')
+bu6 = types.InlineKeyboardButton('<<<', callback_data='<')
+markup1.add(but1, but2, but3, bu6, bu5)
 
 setstat_markup = types.InlineKeyboardMarkup(row_width=2)
 but5 = types.InlineKeyboardButton('Заказ доставлен', callback_data='deliver')
@@ -176,7 +182,8 @@ def reactions(message):
 
 
     if message.text == 'Каталог':
-        qb.send_message(message.from_user.id, '...', reply_markup=markup1)
+        qb.send_photo(chat_id=message.chat.id, photo=all_data1[str(all_data1['now_id'])], caption=product_data['tie_fig']['desc'], reply_markup=markup1)
+        # qb.send_message(message.from_user.id, '...', reply_markup=markup1)
 
     if message.text == 'Помощь':
         qb.send_message(message.from_user.id, 'Эта функция пока не работает')
@@ -230,6 +237,26 @@ def callback_inline(call):
                 db.Sqlither.clear_basket(self=True, user_id=call.message.chat.id)
                 qb.send_message(call.message.chat.id, 'Успешно')
 
+            elif call.data == '>':
+                if (all_data1['now_id'] + 1) < 4:
+                    all_data1['now_id'] += 1
+                else:
+                    all_data1['now_id'] -= 2
+                    print('!?')
+
+                print('!?!')
+                qb.edit_message_media(media=types.InputMedia(type='photo', media=all_data1[str(all_data1['now_id'])]),
+                                      chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                      reply_markup=markup1)
+
+            elif call.data == '<':
+                if (all_data1['now_id'] - 1) > 0:
+                    all_data1['now_id'] -= 1
+                else:
+                    all_data1['now_id'] += 2
+                qb.edit_message_media(media=types.InputMedia(type='photo', media=all_data1[str(all_data1['now_id'])]),
+                                      chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                      reply_markup=markup1)
 
 
             elif call.data == 'carry':
