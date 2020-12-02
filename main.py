@@ -93,19 +93,47 @@ def delivered(message):
 
 
 def set_count(message):
-    all_data['counts'] = message.text
-    print(all_data['now_prod'])
-    if all_data['now_prod'] == 'tie_fig':
-        db.Sqlither.add_fighter(self=True, user_id=message.from_user.id, count=int(all_data['counts']))
+    try:
+        all_data['counts'] = message.text
+        print(all_data['now_prod'])
+        if all_data['now_prod'] == 'tie_fig':
+            db.Sqlither.add_fighter(self=True, user_id=message.from_user.id, count=int(all_data['counts']))
+            if db.datas['Err'] == True:
+                send = qb.send_message(message.from_user.id, 'Оххх, вы не так ввели запрос!')
+                db.datas['Err'] = False
+                qb.register_next_step_handler(send, set_count)
+            else:
+                qb.send_message(message.from_user.id, 'Успешно добавлено  в корзину')
 
-    elif all_data['now_prod'] == 'tie_def':
-        db.Sqlither.add_defender(self=True, user_id=message.from_user.id, count=int(all_data['counts']))
+        elif all_data['now_prod'] == 'tie_def':
+            db.Sqlither.add_defender(self=True, user_id=message.from_user.id, count=int(all_data['counts']))
+            if db.datas['Err'] == True:
+                send = qb.send_message(message.from_user.id, 'Оххх, вы не так ввели запрос!')
+                db.datas['Err'] = False
+                qb.register_next_step_handler(send, set_count)
+            else:
+                qb.send_message(message.from_user.id, 'Успешно добавлено  в корзину')
 
-    elif all_data['now_prod'] == 'tie_int':
-        db.Sqlither.add_interceptor(self=True, user_id=message.from_user.id, count=int(all_data['counts']))
+        elif all_data['now_prod'] == 'tie_int':
+            db.Sqlither.add_interceptor(self=True, user_id=message.from_user.id, count=int(all_data['counts']))
+            if db.datas['Err'] == True:
+                send = qb.send_message(message.from_user.id, 'Оххх, вы не так ввели запрос!')
+                db.datas['Err'] = False
+                qb.register_next_step_handler(send, set_count)
+            else:
+                qb.send_message(message.from_user.id, 'Успешно добавлено  в корзину')
 
-    all_data['counts'] = None
-    all_data['now_prod'] = None
+        all_data['counts'] = None
+        all_data['now_prod'] = None
+
+    except Exception as er:
+        db.datas['Err'] = True
+
+    if db.datas['Err'] == True:
+        send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
+        db.datas['Err'] = False
+        qb.register_next_step_handler(send, set_count)
+
 
 def delete_fromb(message):
     all_data['now_id'] = message.from_user.id
@@ -113,6 +141,10 @@ def delete_fromb(message):
 
     if all_data['now_del'] == '1':
         db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'], numb=all_data['now_del'])
+        if db.datas['Err'] == True:
+            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
+            db.datas['Err'] = False
+            qb.register_next_step_handler(send, delete_fromb)
         all_data['now_id'] = None
         all_data['counts'] = None
         all_data['now_del'] = None
@@ -123,6 +155,10 @@ def delete_fromb(message):
     elif all_data['now_del'] == '2':
         db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'],
                                        numb=all_data['now_del'])
+        if db.datas['Err'] == True:
+            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
+            db.datas['Err'] = False
+            qb.register_next_step_handler(send, delete_fromb)
         all_data['now_id'] = None
         all_data['counts'] = None
         all_data['now_del'] = None
@@ -131,6 +167,11 @@ def delete_fromb(message):
     elif all_data['now_del'] == '3':
         db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'],
                                        numb=all_data['now_del'])
+        if db.datas['Err'] == True:
+            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
+            db.datas['Err'] = False
+            qb.register_next_step_handler(send, delete_fromb)
+            db.datas['Err'] = False
         all_data['now_id'] = None
         all_data['counts'] = None
         all_data['now_del'] = None
@@ -185,6 +226,7 @@ def reactions(message):
         all_data['mesid'] = send.message_id
         qb.send_photo(chat_id=message.chat.id, photo=open('imgs/%s.jpg' % all_data1[str(all_data1['now_id'])], 'rb'),
                        reply_markup=markup1)
+
         # qb.send_message(message.from_user.id, '...', reply_markup=markup1)
 
     if message.text == 'Помощь':
