@@ -138,95 +138,109 @@ class Sqlither:
             if numb == '1':
                 if basket2[0] == 'tie_fig':
                     nc = cursor.execute('SELECT `tie_fig` FROM `order_composition` WHERE `user_id` = ?', (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?', (int(nc[0])-int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0]-int(counts)*500, user_id))
+                    if nc[0] >= int(counts):
+                        print('It`s ok')
+                        cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?', (int(nc[0])-int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0]-int(counts)*500, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
                 elif basket2[0] == 'tie_def':
                     nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
                                    (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 600, user_id))
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 600, user_id))
 
                 elif basket2[0] == 'tie_int':
                     nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
                                     (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
-                               (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 650, user_id))
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
+                                   (int(nc[0]) - int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 650, user_id))
 
             elif numb == '2':
                 if basket2[1] == 'tie_fig':
                     nc = cursor.execute('SELECT `tie_fig` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?',
-                                   (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 500, user_id))
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?',
+                                       (int(nc[0]) - int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 500, user_id))
 
                 elif basket2[1] == 'tie_def':
                     nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
-                                (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 600, user_id))
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
+                                    (int(nc[0]) - int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 600, user_id))
 
                 elif basket2[1] == 'tie_int':
                     nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
-                               (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 650, user_id))
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
+                                   (int(nc[0]) - int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 650, user_id))
 
             elif numb == '3':
                 if basket2[2] == 'tie_fig':
                     nc = cursor.execute('SELECT `tie_fig` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?',
-                                   (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 500, user_id))
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_fig` = ? WHERE `user_id` = ?',
+                                           (int(nc[0]) - int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 500, user_id))
 
                 elif basket2[2] == 'tie_def':
                     nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
-                                   (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 600, user_id))
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_de` = ? WHERE `user_id` = ?',
+                                       (int(nc[0]) - int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 600, user_id))
 
                 elif basket2[2] == 'tie_int':
                     nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
-                                   (int(nc[0]) - int(counts), user_id))
-                    nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
-                                        (user_id,)).fetchone()
-                    cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
-                                   (nc[0] - int(counts) * 650, user_id))
+                    if nc[0] >= int(counts):
+                        cursor.execute('UPDATE `order_composition` SET `tie_int` = ? WHERE `user_id` = ?',
+                                       (int(nc[0]) - int(counts), user_id))
+                        nc = cursor.execute('SELECT `all_price` FROM `order_composition` WHERE `user_id` = ?',
+                                            (user_id,)).fetchone()
+                        cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
+                                       (nc[0] - int(counts) * 650, user_id))
 
         except Exception as er:
+            print(er)
             datas['Err'] = True
 
 

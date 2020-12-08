@@ -154,13 +154,14 @@ def delete_fromb(message):
     if all_data['now_del'] == '1':
         db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'], numb=all_data['now_del'])
         if db.datas['Err'] == True:
-            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
+            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число, не превышающее количество,'
+                                                         'уже присутствующее в Вашей корзине: ')
             db.datas['Err'] = False
+            print('III')
             qb.register_next_step_handler(send, delete_fromb)
-        all_data['now_id'] = None
-        all_data['counts'] = None
-        all_data['now_del'] = None
-        db.basket2 = []
+            print('XXX')
+            breakpoint()
+
 
 
 
@@ -170,11 +171,10 @@ def delete_fromb(message):
         if db.datas['Err'] == True:
             send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
             db.datas['Err'] = False
+            print('III')
             qb.register_next_step_handler(send, delete_fromb)
-        all_data['now_id'] = None
-        all_data['counts'] = None
-        all_data['now_del'] = None
-        db.basket2 = []
+            print('XXX')
+            breakpoint()
 
     elif all_data['now_del'] == '3':
         db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'],
@@ -182,12 +182,17 @@ def delete_fromb(message):
         if db.datas['Err'] == True:
             send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
             db.datas['Err'] = False
+            print('III')
             qb.register_next_step_handler(send, delete_fromb)
-            db.datas['Err'] = False
-        all_data['now_id'] = None
-        all_data['counts'] = None
-        all_data['now_del'] = None
-        db.basket2 = []
+            print('XXX')
+            breakpoint()
+
+    all_data['now_id'] = None
+    all_data['counts'] = None
+    all_data['now_del'] = None
+    db.basket2 = []
+
+
 
 def regorder(message):
     try:
