@@ -12,7 +12,7 @@ import db
 import emoji
 
 first_prod = None
-token = '1303608144:AAH09kqBe4ahjau7lUKbx6kibiyK2QyvAXk'
+token = '1301756828:AAF3FjdaW20t2gL3nIl2dqvtQfM4T0Mc0Lg'
 zero = 0
 qb = telebot.TeleBot(token)
 
@@ -82,7 +82,8 @@ def welcome(message):
                              paid=False, delivered=False, carried=False,
                              tie_def=0, tie_int=0, tie_fig=0, all_price=0)
         all_data['last_order_id'] += 1
-        qb.send_message(message.from_user.id, 'Добро пожаловать! Будем знакомы, я - Эрик.', reply_markup=markup)
+        qb.send_message(message.from_user.id, 'Добро пожаловать! Будем знакомы, я - Имперский интернет-магазин'
+                                              ' (модель IS-002).', reply_markup=markup)
     else:
         qb.send_message(message.from_user.id, 'Эй, привет! Я тебя знаю', reply_markup=markup)
         all_data['last_order_id'] += 1
