@@ -1,15 +1,8 @@
-'''
-1. Сделать оформление заказа:
-Пользователь нажал на кнопку >>> бот предлагает места выдачи >>> пользователь выбирает, ответ сохраняется в БД >>>
->> подтверждение заказа >>> новый order_id, соответсвующие записи в БД (У Дани)
-Добавить функцию для кассира:
-Когда заказ доставлен, он с помощью команды поставит статус "доставлено" +
-2. Удаление из корзины
-'''
 import telebot
 from telebot import types
 import db
-import emoji
+import oplata
+import sqlite3
 
 first_prod = None
 token = '1301756828:AAF3FjdaW20t2gL3nIl2dqvtQfM4T0Mc0Lg'
@@ -25,15 +18,15 @@ place = {1: 'Татуин, Мос Эйсли, пл. №14',
          2: 'Корусант, Бывший Храм Джедаев, пл. №3',
          3: 'Лотал, столица, пл. №9'}
 
-product_data = {'tie_fig': {'beat_name': 'TIE-fighter', 'price': 500, 'desc': 'Обычный истребитель'},
-                'tie_def': {'beat_name': 'TIE-defender', 'price': 600, 'desc': 'Улучшенный истребитель, проект предложен гранд-адмиралом Трауном'},
-                'tie_int': {'beat_name': 'TIE-intereceptor', 'price': 650, 'desc': 'Резвый истребитель в Ваши ряды!'}}
+product_data = {'tie_fig': {'beat_name': 'TIE-fighter', 'price': 500, 'desc': 'TIE-fighter: Обычный истребитель'},
+                'tie_def': {'beat_name': 'TIE-defender', 'price': 600, 'desc': 'TIE-defender: Улучшенный истребитель, проект предложен гранд-адмиралом Трауном'},
+                'tie_int': {'beat_name': 'TIE-intereceptor', 'price': 650, 'desc': 'TIE-intereceptor: Резвый истребитель в Ваши ряды!'}}
 
 
 markup = types.ReplyKeyboardMarkup(True)  # основная клавиатура, присылается по команде /start
 item1 = types.KeyboardButton('Корзина')
 item2 = types.KeyboardButton('Каталог')
-item3 = types.KeyboardButton('Помощь')
+item3 = types.KeyboardButton('Контакты')
 item4 = types.KeyboardButton('Оформление заказа')
 markup.add(item1, item2, item3, item4)
 
@@ -75,7 +68,7 @@ check_markup.add(but8, but9)
 
 
 
-@qb.message_handler(commands=['start']) #
+@qb.message_handler(commands=['start'])
 def welcome(message):
     if (not db.Sqlither.user_exists(self=True, user_id=message.from_user.id)):
         db.Sqlither.add_user(self=True, user_id=message.from_user.id, order_id=all_data['last_order_id'],
@@ -88,10 +81,57 @@ def welcome(message):
         qb.send_message(message.from_user.id, 'Эй, привет! Я тебя знаю', reply_markup=markup)
         all_data['last_order_id'] += 1
 
-@qb.message_handler(commands=['test'])
-def testing(message):
-    res = db.Sqlither.wait_for_payment(user_id=message.from_user.id, self=True)
-    qb.send_message(message.from_user.id, 'Операция успешно завершена')
+def oplata1(message):
+    try:
+        print('1')
+        import requests
+        import json
+        import sqlite3
+        from random import randint
+        print('1')
+        conn = sqlite3.connect('db.db')
+        c = conn.cursor()
+
+        db.Sqlither.basket(user_id=message.from_user.id, self=True)
+        print('1')
+        phone = str(message.text)
+        sum = db.basket['all_price']
+        nw = c.execute('SELECT `order_id` FROM `users` WHERE `user_id` = ?', (message.from_user.id,)).fetchone()
+        random_code = nw[0]
+        print('1')
+        print('2')
+        QIWI_TOKEN = '33a620d083281a4a3641f7845563bc5b'
+        QIWI_ACCOUNT = '79109024495'
+        print('3')
+        s = requests.Session()
+        s.headers['authorization'] = 'Bearer ' + QIWI_TOKEN
+        parameters = {'rows': '50'}
+        h = s.get('https://edge.qiwi.com/payment-history/v1/persons/' + QIWI_ACCOUNT + '/payments', params=parameters)
+        req = json.loads(h.text)
+        print('1')
+        c.execute("CREATE TABLE IF NOT EXISTS payment_query(user_id INTEGER, phone TEXT, sum INTEGER, code INTEGER)")
+
+
+        c.execute(f"INSERT INTO payment_query VALUES(?, ?, ?, ?)", (message.from_user.id, phone, sum, random_code))
+
+        result = c.execute(f"SELECT * FROM payment_query WHERE user_id = {message.chat.id}").fetchone()  # достаем данные из таблицы
+
+
+        print(phone, random_code, sum)
+        db.basket=[]
+
+        qb.send_message(message.from_user.id, 'Ваш телефон: %s, Ваш айди заказа: %s, Сумма: %s' % (phone, random_code, sum))
+        qb.send_message(message.from_user.id, 'Переведите деньги на этот счет киви:\n'
+                                              '33a620d083281a4a3641f7845563bc5b')
+
+        conn = sqlite3.connect('db.db')
+        c = conn.cursor()
+        db.Sqlither.regorder(self=True, user_id=message.from_user.id, new_order_id=all_data['last_order_id'])
+        all_data['last_order_id'] += 1
+        oplata.process.check_qiwi(self=True)
+        conn.commit()
+    except Exception as e:
+        print(e)
 
 def setstat2(message):
     all_data['now_id'] = message.text
@@ -153,7 +193,7 @@ def delete_fromb(message):
     all_data['counts'] = message.text
 
     if all_data['now_del'] == '1':
-        db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'], numb=all_data['now_del'])
+        db.Sqlither.delete_from_basket(self=True, user_id=message.from_user.id, counts=all_data['counts'], numb='1')
         if db.datas['Err'] == True:
             send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число, не превышающее количество,'
                                                          'уже присутствующее в Вашей корзине: ')
@@ -167,10 +207,12 @@ def delete_fromb(message):
 
 
     elif all_data['now_del'] == '2':
-        db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'],
-                                       numb=all_data['now_del'])
+        print('deleting2')
+        db.Sqlither.delete_from_basket(self=True, user_id=message.from_user.id, counts=all_data['counts'],
+                                       numb='2')
         if db.datas['Err'] == True:
-            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
+            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число, не превышающее количество,'
+                                                         'уже присутствующее в Вашей корзине: ')
             db.datas['Err'] = False
             print('III')
             qb.register_next_step_handler(send, delete_fromb)
@@ -178,10 +220,11 @@ def delete_fromb(message):
             breakpoint()
 
     elif all_data['now_del'] == '3':
-        db.Sqlither.delete_from_basket(self=True, user_id=all_data['now_id'], counts=all_data['counts'],
-                                       numb=all_data['now_del'])
+        db.Sqlither.delete_from_basket(self=True, user_id=message.from_user.id, counts=all_data['counts'],
+                                       numb='3')
         if db.datas['Err'] == True:
-            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число:')
+            send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число, не превышающее количество,'
+                                                         'уже присутствующее в Вашей корзине: ')
             db.datas['Err'] = False
             print('III')
             qb.register_next_step_handler(send, delete_fromb)
@@ -192,6 +235,7 @@ def delete_fromb(message):
     all_data['counts'] = None
     all_data['now_del'] = None
     db.basket2 = []
+    qb.send_message(message.from_user.id, 'Успешно удалено из корзины')
 
 
 
@@ -215,7 +259,6 @@ def basket1(message, mo):
     if mo == 1:
         db.Sqlither.basket(self=True, user_id=message.from_user.id)
         if db.basket['empty'] == False:
-            qb.send_message(message.from_user.id, 'Ваша корзина не пуста')
             couel = len(db.basket1)
             print(couel, db.basket1)
             for x in range(0, couel):
@@ -244,9 +287,6 @@ def basket1(message, mo):
         elif db.basket['empty'] == True:
             qb.send_message(message.from_user.id, 'Ваша корзина пуста')
 
-    elif mo == 2:
-        pass
-
 
 
 @qb.message_handler(content_types=['text'])
@@ -263,8 +303,8 @@ def reactions(message):
 
         # qb.send_message(message.from_user.id, '...', reply_markup=markup1)
 
-    elif message.text == 'Помощь':
-        qb.send_message(message.from_user.id, 'Эта функция пока не работает')
+    elif message.text == 'Контакты':
+        qb.send_message(message.chat.id, '===☎Контакты===\n\nГлавный разработчик\n@Spatium_Lustrator\nГлавный менеджер\n@Space_Scout_1')
 
     elif message.text == 'Оформление заказа':
         db.Sqlither.basket(self=True, user_id=message.from_user.id)
@@ -322,6 +362,7 @@ def callback_inline(call):
                 all_data['now_del'] = '2'
                 send = qb.send_message(call.message.chat.id, 'Введите кол-во, которое необходимо удалить: ')
                 qb.register_next_step_handler(send, delete_fromb)
+                print('deleting1')
 
             elif call.data == 'del3':
                 all_data['now_del'] = '3'
@@ -362,27 +403,27 @@ def callback_inline(call):
 
             elif call.data == 'place1':
                 db.Sqlither.set_place(self=True, place=1, user_id=call.message.chat.id)
-                send = qb.send_message(call.message.chat.id, 'Введите номер Вашей карты: ')
-                qb.register_next_step_handler(send, regorder)
+                send = qb.send_message(call.message.chat.id, 'Напишите ваш номер телефона\nВ формате +79998887766')
+                qb.register_next_step_handler(send, oplata1)
 
 
             elif call.data == 'place2':
                 db.Sqlither.set_place(self=True, place=2, user_id=call.message.chat.id)
-                send = qb.send_message(call.message.chat.id, 'Введите номер Вашей карты: ')
-                qb.register_next_step_handler(send, regorder)
+                send = qb.send_message(call.message.chat.id, 'Напишите ваш номер телефона\nВ формате +79998887766')
+                qb.register_next_step_handler(send, oplata1)
 
             elif call.data == 'place3':
                 db.Sqlither.set_place(self=True, place=3, user_id=call.message.chat.id)
-                send = qb.send_message(call.message.chat.id, 'Введите номер Вашей карты: ')
-                qb.register_next_step_handler(send, regorder)
-
+                send = qb.send_message(call.message.chat.id, 'Напишите ваш номер телефона\nВ формате +79998887766')
+                qb.register_next_step_handler(send, oplata1)
 
             elif call.data == 'un_right':
-               basket1(call.message, mo=2)
+                qb.send_message(call.message.chat.id, 'Если Вы зайдете в корзину, сможете удалить ненужные товары. '
+                                                      'Чтобы добавить товар в корзину, войдите в каталог.'
+                                                      'Вернитесь, когда будете уверены в заказе))')
 
 
-            elif call.data == 'carry':
-                pass
+
 
 
 

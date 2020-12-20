@@ -22,8 +22,8 @@ class Sqlither:
     def add_user(self, user_id, order_id, paid, delivered, carried, tie_fig, tie_int, tie_def, all_price):
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
-        cursor.execute('insert into order_status(user_id, order_id, paid, delivered, carried) values(?, ?, ?, ?, ?)',
-                       (user_id, order_id, paid, delivered, carried))
+        cursor.execute('insert into order_status(user_id, order_id, paid, delivered) values(?, ?, ?, ?)',
+                       (user_id, order_id, paid, delivered))
         cursor.execute('insert into order_composition(order_id, user_id, tie_fig, tie_de, tie_int, all_price) values(?, ?, ?, ?, ?, ?)',
                        (order_id, user_id, tie_fig, tie_def, tie_int, all_price))
         cursor.execute('insert into users(user_id, order_id) values(?, ?)', (user_id, order_id))
@@ -76,6 +76,7 @@ class Sqlither:
             cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                            (count * 650 + nc[0], user_id))
 
+
             conn.commit()
             conn.close()
         except Exception as er:
@@ -120,7 +121,7 @@ class Sqlither:
                 ad['None'] += 1
                 print(ad['None'])
             else:
-                if ties[i] not in basket1 and basket[ties[i]] > 0:
+                if ties[i] not in basket1 and int(basket[ties[i]]) > 0:
                     basket1.append(ties[i])
                     print(basket1)
                     basket2.append(ties[i])
@@ -150,6 +151,7 @@ class Sqlither:
                         return AttributeError
 
                 elif basket2[0] == 'tie_def':
+                    print('deleting3')
                     nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
                                         (user_id,)).fetchone()
                     if nc[0] >= int(counts):
@@ -159,6 +161,9 @@ class Sqlither:
                                         (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 600, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
                 elif basket2[0] == 'tie_int':
                     nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
@@ -170,6 +175,9 @@ class Sqlither:
                                             (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 650, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
             elif numb == '2':
                 if basket2[1] == 'tie_fig':
@@ -182,6 +190,9 @@ class Sqlither:
                                             (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 500, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
                 elif basket2[1] == 'tie_def':
                     nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
@@ -193,6 +204,9 @@ class Sqlither:
                                             (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 600, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
                 elif basket2[1] == 'tie_int':
                     nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
@@ -204,6 +218,9 @@ class Sqlither:
                                             (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 650, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
             elif numb == '3':
                 if basket2[2] == 'tie_fig':
@@ -216,6 +233,9 @@ class Sqlither:
                                             (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 500, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
                 elif basket2[2] == 'tie_def':
                     nc = cursor.execute('SELECT `tie_de` FROM `order_composition` WHERE `user_id` = ?',
@@ -227,6 +247,9 @@ class Sqlither:
                                             (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 600, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
                 elif basket2[2] == 'tie_int':
                     nc = cursor.execute('SELECT `tie_int` FROM `order_composition` WHERE `user_id` = ?',
@@ -238,6 +261,9 @@ class Sqlither:
                                             (user_id,)).fetchone()
                         cursor.execute('UPDATE `order_composition` SET `all_price` = ? WHERE `user_id` = ?',
                                        (nc[0] - int(counts) * 650, user_id))
+                    else:
+                        datas['Err'] = True
+                        return AttributeError
 
         except Exception as er:
             print(er)
@@ -252,7 +278,7 @@ class Sqlither:
     def clear_basket(self, user_id):
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
-        cursor.execute('UPDATE `order_composition` SET `tie_fig` = 0, `tie_de` = 0, `tie_int` = 0 WHERE user_id = ?',
+        cursor.execute('UPDATE `order_composition` SET `tie_fig` = 0, `tie_de` = 0, `tie_int` = 0, `all_price` = 0 WHERE user_id = ?',
                        (user_id, ))
         conn.commit()
         conn.close()
@@ -264,29 +290,16 @@ class Sqlither:
         conn.commit()
         conn.close()
 
-    def add_user_card(self, user_id, card_num):
+    def regorder(self, user_id, new_order_id):
         conn = sqlite3.connect('db.db')
         cursor = conn.cursor()
-        cursor.execute('UPDATE `users` SET `num_acc` = ? WHERE user_id = ?', (card_num, user_id))
+        cursor.execute('UPDATE `order_composition` SET `user_id` = ? WHERE user_id = ?', (1, user_id))
+        cursor.execute('UPDATE `users` SET `order_id` = ? WHERE user_id = ?', (new_order_id, user_id))
+        cursor.execute('insert into order_composition(order_id, user_id, tie_fig, tie_de, tie_int, all_price) values(?, ?, ?, ?, ?, ?)',
+            (new_order_id, user_id, 0, 0, 0, 0))
+        cursor.execute('UPDATE `order_status` SET `user_id` = 0 WHERE user_id = ?', (user_id, ))
+        cursor.execute('insert into order_status(user_id, order_id, paid, delivered) values(?, ?, ?, ?)',
+                       (user_id, new_order_id, 0, 0))
         conn.commit()
-        conn.close()
-
-    def wait_for_payment(self, user_id):
-        conn = sqlite3.connect('db.db')
-        cursor = conn.cursor()
-        a = 0
-        while datas['paid'] == False:
-            res = cursor.execute('SELECT `paid` FROM `order_status` WHERE `user_id` = ?',
-                           (user_id,)).fetchone()
-            if a == 6:
-                cursor.execute('UPDATE `order_status` SET `paid` = 1 WHERE user_id = ?', (user_id, ))
-            a += 1
-            datas['paid'] = res[0]
-            print(res)
-
-        conn.commit()
-        conn.close()
 
 
-    def reg_order(self, user_id):
-        pass
