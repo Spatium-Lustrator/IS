@@ -124,11 +124,19 @@ def oplata1(message):
         qb.send_message(message.from_user.id, 'Переведите деньги на этот счет киви:\n'
                                               '33a620d083281a4a3641f7845563bc5b')
 
+        oplata.process.check_qiwi(self=True)
+        # проходимся циклом по словарю
+        for i in range(len(req['data'])):
+            if req['data'][i]['account'] == phone:
+                if req['data'][i]['comment'] == random_code:
+                    if req['data'][i]['sum']['amount'] == sum:
+                        c.execute('UPDATE `order_status` SET `paid` = 1 WHERE user_id = ?', (message.from_user.id))
+                        qb.send_message(message.from_user.id, 'Оплата принята')
+
         conn = sqlite3.connect('db.db')
         c = conn.cursor()
         db.Sqlither.regorder(self=True, user_id=message.from_user.id, new_order_id=all_data['last_order_id'])
         all_data['last_order_id'] += 1
-        oplata.process.check_qiwi(self=True)
         conn.commit()
     except Exception as e:
         print(e)
