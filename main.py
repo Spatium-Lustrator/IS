@@ -5,7 +5,7 @@ import oplata
 import sqlite3
 
 first_prod = None
-token = '1301756828:AAF3FjdaW20t2gL3nIl2dqvtQfM4T0Mc0Lg'
+token = '1303608144:AAH09kqBe4ahjau7lUKbx6kibiyK2QyvAXk'
 zero = 0
 qb = telebot.TeleBot(token)
 
@@ -198,6 +198,7 @@ def set_count(message):
 
 def delete_fromb(message):
     all_data['now_id'] = message.from_user.id
+    print(all_data['now_id'])
     all_data['counts'] = message.text
 
     if all_data['now_del'] == '1':
@@ -206,10 +207,19 @@ def delete_fromb(message):
             send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число, не превышающее количество,'
                                                          'уже присутствующее в Вашей корзине: ')
             db.datas['Err'] = False
-            print('III')
-            qb.register_next_step_handler(send, delete_fromb)
-            print('XXX')
-            breakpoint()
+            basket1(message=message, mo=1)
+            # print('III')
+            # qb.register_next_step_handler(send, delete_fromb)
+            # print('XXX')
+            # breakpoint()
+        else:
+
+            all_data['now_id'] = None
+            all_data['counts'] = None
+            all_data['now_del'] = None
+            db.basket2 = []
+            qb.send_message(message.from_user.id, 'Успешно удалено из корзины')
+
 
 
 
@@ -222,28 +232,39 @@ def delete_fromb(message):
             send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число, не превышающее количество,'
                                                          'уже присутствующее в Вашей корзине: ')
             db.datas['Err'] = False
-            print('III')
-            qb.register_next_step_handler(send, delete_fromb)
-            print('XXX')
+            basket1(message=message, mo=1)
+            # print('III')
+            # qb.register_next_step_handler(send, delete_fromb)
+            # print('XXX')
             breakpoint()
+        else:
+
+            all_data['now_id'] = None
+            all_data['counts'] = None
+            all_data['now_del'] = None
+            db.basket2 = []
+            qb.send_message(message.from_user.id, 'Успешно удалено из корзины')
+
 
     elif all_data['now_del'] == '3':
         db.Sqlither.delete_from_basket(self=True, user_id=message.from_user.id, counts=all_data['counts'],
                                        numb='3')
         if db.datas['Err'] == True:
             send = qb.send_message(message.from_user.id, 'Введите пожалуйста только число, не превышающее количество,'
-                                                         'уже присутствующее в Вашей корзине: ')
+                                                         'уже присутствующее в Вашей корзине.')
             db.datas['Err'] = False
-            print('III')
-            qb.register_next_step_handler(send, delete_fromb)
-            print('XXX')
+            basket1(message=message, mo=1)
+            # print('III')
+            # qb.register_next_step_handler(send, delete_fromb)
+            # print('XXX')
             breakpoint()
+        else:
 
-    all_data['now_id'] = None
-    all_data['counts'] = None
-    all_data['now_del'] = None
-    db.basket2 = []
-    qb.send_message(message.from_user.id, 'Успешно удалено из корзины')
+            all_data['now_id'] = None
+            all_data['counts'] = None
+            all_data['now_del'] = None
+            db.basket2 = []
+            qb.send_message(message.from_user.id, 'Успешно удалено из корзины')
 
 
 
